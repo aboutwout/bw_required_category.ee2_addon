@@ -6,7 +6,7 @@ Makes categories required for specified channels.
 
 Developed by Wouter Vervloet, http://www.baseworks.nl/
 
-BW Required Category ExpressionEngine 2 add-on and won't be ported to ExpressionEngine 1.x. If you are looking for a EE 1.x solution, I suggest you check out Designchuchi's [DC Required Category](http://devot-ee.com/add-ons/dc-required-category/) as it equally (or even more) awesome.
+BW Required Category is an *ExpressionEngine 2* add-on and won't be ported to ExpressionEngine 1.x. If you are looking for a EE 1.x solution, I suggest you check out Designchuchi's [DC Required Category](http://devot-ee.com/add-ons/dc-required-category/) as it equally (or even more) awesome.
 
 ### Installation
 
