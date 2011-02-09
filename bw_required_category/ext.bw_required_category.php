@@ -20,7 +20,7 @@ class Bw_required_category_ext
   public $settings             = array();
   
   public $name                 = 'BW Required Category';
-  public $version              = '0.9';
+  public $version              = '0.9.1';
   public $description          = "Makes categories required for specified channels";
   public $settings_exist       = 'y';
   public $docs_url             = 'http://www.baseworks.nl/';
@@ -65,18 +65,20 @@ class Bw_required_category_ext
   /**
   * 
   */
-  function check_category_presence($channel_id=0, $autosave=false)
+  function check_category_presence($channel_id=0, $autosave=FALSE)
   {
           
-    if( !$channel_id || $autosave === true ) return;
+    if( ! $channel_id || $autosave === TRUE ) return;
 
-    if( !in_array($channel_id, $this->enabled_channels) ) return;
+    if( ! in_array($channel_id, $this->enabled_channels) ) return;
 
   	$this->EE->lang->loadfile('bw_required_category');
         
-    if( !isset($this->EE->api_channel_entries->data['category']) ) {
-      show_error($this->EE->lang->line('bw_forgot_category'));
-      return false;
+    if( ! isset($this->EE->api_channel_entries->data['category']) )
+    {
+      $this->EE->javascript->output('$.ee_notice("'.$this->EE->lang->line('bw_forgot_category').'", {type : "error"})');
+			$this->EE->api_channel_entries->_set_error('bw_forgot_category', 'category');
+			$this->end_script = TRUE;
     }
 
   }
@@ -102,7 +104,7 @@ class Bw_required_category_ext
         $vars['channels'][] = array(
           'channel_id' => $channel->channel_id,
           'channel_title' => $channel->channel_title,
-          'enabled' => (isset($current[$this->site_id][$channel->channel_id])) ? $current[$this->site_id][$channel->channel_id] : false
+          'enabled' => (isset($current[$this->site_id][$channel->channel_id])) ? $current[$this->site_id][$channel->channel_id] : FALSE
         );
       }
       
@@ -134,7 +136,7 @@ class Bw_required_category_ext
 
   	foreach($channels->result() as $channel)
   	{
-  	  $settings[$this->site_id][$channel->channel_id] = (isset($_POST[$channel->channel_id])) ? true : false;
+  	  $settings[$this->site_id][$channel->channel_id] = (isset($_POST[$channel->channel_id])) ? TRUE : FALSE;
   	}
   	
     $this->EE->db->update('extensions', array('settings' => serialize($settings)));
@@ -164,7 +166,7 @@ class Bw_required_category_ext
 	    {
   	    foreach ($channels->result() as $channel)
   	    {
-  	      $settings[$site->site_id][$channel->channel_id] = false;
+  	      $settings[$site->site_id][$channel->channel_id] = FALSE;
   	    }	      
 	    }
 	  }
@@ -183,7 +185,7 @@ class Bw_required_category_ext
     // insert in database
     $this->EE->db->insert('exp_extensions', $data);
 
-    return true;
+    return TRUE;
 	}
 	// END activate_extension
 	 
