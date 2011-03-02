@@ -139,7 +139,7 @@ class Bw_required_category_ext
   	  $settings[$this->site_id][$channel->channel_id] = (isset($_POST[$channel->channel_id])) ? TRUE : FALSE;
   	}
   	
-    $this->EE->db->update('extensions', array('settings' => serialize($settings)));
+    $this->EE->db->where('class', __CLASS__)->update('extensions', array('settings' => serialize($settings)));
     
     $this->EE->session->set_flashdata(
   		'message_success',
