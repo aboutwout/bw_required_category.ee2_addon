@@ -20,7 +20,7 @@ class Bw_required_category_ext
   public $settings             = array();
   
   public $name                 = 'BW Required Category';
-  public $version              = '0.9.1';
+  public $version              = 1.0;
   public $description          = "Makes categories required for specified channels";
   public $settings_exist       = 'y';
   public $docs_url             = 'http://www.baseworks.nl/';
@@ -65,24 +65,63 @@ class Bw_required_category_ext
   /**
   * 
   */
-  function check_category_presence($channel_id=0, $autosave=FALSE)
-  {
-          
-    if( ! $channel_id || $autosave === TRUE ) return;
+  function entry_submission_start($channel_id=0, $autosave=FALSE)
+  { 
+    if ( ! $channel_id OR $autosave === TRUE) return;
 
-    if( ! in_array($channel_id, $this->enabled_channels) ) return;
+    if ( ! in_array($channel_id, $this->enabled_channels)) return;
 
-  	$this->EE->lang->loadfile('bw_required_category');
-        
-    if( ! isset($this->EE->api_channel_entries->data['category']) )
+    // Instantiate the channel_categories API
+    $this->EE->load->library('api');
+    $this->EE->api->instantiate('channel_categories');    
+
+    if ($this->_check_category_presence($channel_id, $this->EE->api_channel_categories->categories) === FALSE)
     {
+      // Load the bw_required_category language file
+    	$this->EE->lang->loadfile('bw_required_category');
+
       $this->EE->javascript->output('$.ee_notice("'.$this->EE->lang->line('bw_forgot_category').'", {type : "error"})');
-			$this->EE->api_channel_entries->_set_error('bw_forgot_category', 'category');
+			$this->EE->api_channel_categories->_set_error('bw_forgot_category', 'category');
 			$this->end_script = TRUE;
     }
 
   }
-  // END check_category_presence    
+  // END check_category_presence
+  
+  function safecracker_submit_entry_start($obj=NULL)
+  {
+    $channel_id = $obj->channel['channel_id'];
+    $categories = $this->EE->input->post('category');
+    
+    if ( ! in_array($channel_id, $this->enabled_channels)) return;
+    
+    if ($this->_check_category_presence($channel_id, $categories) === FALSE)
+    {
+      // Load the bw_required_category language file
+    	$this->EE->lang->loadfile('bw_required_category');
+      
+      $obj->errors[] = $this->EE->lang->line('bw_forgot_category');
+    }
+    
+  }
+  
+  function _check_category_presence($channel_id=0, $categories=array())
+  {
+    if ( ! $channel_id) return;
+      
+    if ( ! is_array($categories)) return FALSE;  
+      
+    // If channel doesn't have to be checked for categories, skip the check
+    if ( ! in_array($channel_id, $this->enabled_channels)) return TRUE;
+    
+    if (count($categories) === 0)
+    {
+      return FALSE;
+    }
+    
+    return TRUE;
+    
+  }
   
   /**
   *
@@ -171,19 +210,12 @@ class Bw_required_category_ext
 	    }
 	  }
 
-    // data to insert
-    $data = array(
-      'class'		=> get_class($this),
-      'method'	=> 'check_category_presence',
-      'hook'		=> 'entry_submission_start',
-      'priority'	=> 1,
-      'version'	=> $this->version,
-      'enabled'	=> 'y',
-      'settings'	=> serialize($settings)
+    $hooks = array(
+      'entry_submission_start' => 'entry_submission_start',
+      'safecracker_submit_entry_start' => 'safecracker_submit_entry_start'
     );
 
-    // insert in database
-    $this->EE->db->insert('exp_extensions', $data);
+    $this->_add_hooks($hooks, $settings);
 
     return TRUE;
 	}
@@ -195,8 +227,52 @@ class Bw_required_category_ext
 	// --------------------------------  
 	function update_extension($current='')
 	{
+	  if ($current < 1.0)
+	  {
+	    $where = array('class' => get_class($this), 'method' => 'check_category_presence');
+	    $hooks = $this->EE->db->where($where)->get('extensions');
+	    
+	    if ($hooks->num_rows() > 0)
+	    {
+        // Remove the old hooks from the database just to be safe
+	      $this->EE->db->where('class', get_class($this))->delete('extensions');
+
+	      $settings = unserialize($hooks->row('settings'));
+
+        $hooks = array(
+          'entry_submission_start' => 'entry_submission_start',
+          'safecracker_submit_entry_start' => 'safecracker_submit_entry_start'
+        );
+
+
+	      $this->_add_hooks($hooks, $settings);
+
+	    }
+	    
+	  }
   }
   // END update_extension
+  
+  function _add_hooks($hooks=array(), $settings=array())
+  {
+    foreach ($hooks as $hook => $method)
+    {
+      // data to insert
+      $data = array(
+        'class'		=> get_class($this),
+        'method'	=> $method,
+        'hook'		=> $hook,
+        'priority'	=> 1,
+        'version'	=> $this->version,
+        'enabled'	=> 'y',
+        'settings'	=> serialize($settings)
+      );
+
+      // insert in database
+      $this->EE->db->insert('exp_extensions', $data);
+      
+    }
+  }
 
 	// --------------------------------
 	//  Disable Extension
