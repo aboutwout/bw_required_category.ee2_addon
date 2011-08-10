@@ -20,7 +20,7 @@ class Bw_required_category_ext
   public $settings             = array();
   
   public $name                 = 'BW Required Category';
-  public $version              = 1.0;
+  public $version              = 1.1;
   public $description          = "Makes categories required for specified channels";
   public $settings_exist       = 'y';
   public $docs_url             = 'http://www.baseworks.nl/';
@@ -73,15 +73,17 @@ class Bw_required_category_ext
 
     // Instantiate the channel_categories API
     $this->EE->load->library('api');
-    $this->EE->api->instantiate('channel_categories');    
-
-    if ($this->_check_category_presence($channel_id, $this->EE->api_channel_categories->categories) === FALSE)
+    $this->EE->api->instantiate('channel_entries');    
+    
+    if ($this->_check_category_presence($channel_id, $this->EE->input->post('category')) === FALSE)
     {
       // Load the bw_required_category language file
     	$this->EE->lang->loadfile('bw_required_category');
 
+
+
       $this->EE->javascript->output('$.ee_notice("'.$this->EE->lang->line('bw_forgot_category').'", {type : "error"})');
-			$this->EE->api_channel_categories->_set_error('bw_forgot_category', 'category');
+			$this->EE->api_channel_entries->_set_error('bw_forgot_category', 'category');
 			$this->end_script = TRUE;
     }
 
@@ -107,14 +109,14 @@ class Bw_required_category_ext
   
   function _check_category_presence($channel_id=0, $categories=array())
   {
-    if ( ! $channel_id) return;
-      
-    if ( ! is_array($categories)) return FALSE;  
-      
+//    debug($this->EE->api_channel_entries->data['category']);
+    
+    if ( ! $channel_id) return TRUE;
+              
     // If channel doesn't have to be checked for categories, skip the check
     if ( ! in_array($channel_id, $this->enabled_channels)) return TRUE;
     
-    if (count($categories) === 0)
+    if ( ! is_array($categories) OR count($categories) === 0)
     {
       return FALSE;
     }
@@ -134,7 +136,7 @@ class Bw_required_category_ext
   	
     $vars = array();
 
-    $channels = $this->EE->db->get('channels');
+    $channels = $this->EE->db->where('site_id', $this->site_id)->get('channels');
     
     if($channels->num_rows() > 0)
     {
