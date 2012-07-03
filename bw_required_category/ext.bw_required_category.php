@@ -116,7 +116,7 @@ class Bw_required_category_ext
     // If channel doesn't have to be checked for categories, skip the check
     if ( ! in_array($channel_id, $this->enabled_channels)) return TRUE;
     
-    if ( ! is_array($categories) OR count($categories) === 0)
+    if ( ! is_array($categories) OR count($categories) === 0 OR (count($categories) === 1 && empty($categories[0])) )
     {
       return FALSE;
     }
