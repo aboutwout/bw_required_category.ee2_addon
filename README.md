@@ -1,6 +1,6 @@
 # BW Required Category
 
-Makes categories required for specified channels.
+Makes categories required for specified channels category groups.
 
 ### Info
 
@@ -12,9 +12,10 @@ BW Required Category is an *ExpressionEngine 2* add-on and won't be ported to Ex
 
 Drop the entire bw_required_category folder in the third_party folder:
 
-    /system/expressionengine/third_party/auto_expire/
+    /system/expressionengine/third_party/bw_required_category/
 
 
 ### Usage
 
-After installing BW Required Category you set the channel preferences on the extension settings page. BW Required Category is either turned on or off for a specific channel.
+After installing BW Required Category you set the channel preferences on the extension settings page.
+BW Required Category is either turned on or off for specific channel category groups.
