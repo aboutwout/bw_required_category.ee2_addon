@@ -321,4 +321,3 @@ class Bw_required_category_ext
 
 }
 // END CLASS
-?>
