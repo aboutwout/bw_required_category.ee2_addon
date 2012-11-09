@@ -116,9 +116,33 @@ class Bw_required_category_ext
     // If channel doesn't have to be checked for categories, skip the check
     if ( ! in_array($channel_id, $this->enabled_channels)) return TRUE;
 
+
+    // No way! No category selected at all
     if ( ! is_array($categories) OR count($categories) === 0)
     {
       return FALSE;
+    }
+
+    $this->EE->load->model('category_model');
+    $selected_cat_groups = array();
+
+    // For each category, get the group
+    foreach ($categories as $cat) {
+      $qry = $this->EE->category_model->get_category_name_group($cat);
+      if ($qry->num_rows() > 0)
+      {
+        $group = $qry->result();
+        $selected_cat_groups[] = $group[0]->group_id;
+      }
+    }
+
+    $required_cat_groups = $this->settings[$this->site_id][$channel_id];
+
+    foreach ($required_cat_groups as $req_cat_group) {
+      if (! in_array($req_cat_group, $selected_cat_groups))
+      {
+        return FALSE;
+      }
     }
 
     return TRUE;
@@ -321,3 +345,4 @@ class Bw_required_category_ext
 
 }
 // END CLASS
+?>
