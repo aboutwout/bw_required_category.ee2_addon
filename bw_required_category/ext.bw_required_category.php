@@ -31,10 +31,6 @@ class Bw_required_category_ext
 	// -------------------------------
 	// Constructor
 	// -------------------------------
-	function Bw_required_category_ext($settings=array())
-	{
-	  $this->__construct($settings);
-	}
 	
 	function __construct($settings=array())
 	{
